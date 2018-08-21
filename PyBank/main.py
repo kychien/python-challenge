@@ -2,6 +2,8 @@
 ###################################################################################################
 ##  PyBank - practice with opening csv values and evaluating data
 ##
+##  2018 08 21 - Added in default file paths for opening and writing files for now.  Added in 
+##      printing of results to terminal and results file.
 ##  2018 08 17 - Basic implementation of opening file with comments outlining future implementation.
 ##      Added in handling for balance aggregation.  Added in unique month counter assuming data is
 ##      sorted by date. Added intake recording for delta list. Added in greatest value checkers 
@@ -14,13 +16,15 @@ import os                                       #  Possibly necessary for creati
 import csv
 
 ################################################# Get file path for processing
-filepath = input("File path/name:  ")
+filepath = os.path.join(".", "budget_data.csv")
+##if (input("Enter in a "))
+##    input("File path/name:  ")
 
 ################################################# Open reader for main evaluation body
 with open(filepath, "r",newline="") as source:
 
     ############################################# Set variables:
-    reader = csv.reader(source, delimiter=",")  #  csv reader for data
+    f_reader = csv.reader(source, delimiter=",")  #  csv reader for data
     mo_ct = 0                                   #  month counter for unique dates
     last_mo = ""                                #  holder for last month for comparison
     last_res = 0.0                              #  holder for last month's impact
@@ -33,9 +37,12 @@ with open(filepath, "r",newline="") as source:
     g_dec = ["","0"]                            #  tracker for greatest decrease
 
     ############################################# Check for labels
+    first_line = f_reader.readline()
+    if (first_line[0] == "Date")
+        next(f_reader)
 
     ############################################# Loop through file
-    for line in reader:
+    for line in f_reader:
 
         result = float(line[1])
         balance += round(result, 2)
@@ -65,12 +72,38 @@ with open(filepath, "r",newline="") as source:
 
     
     ############################################# Purge first delta value because of lack of history
+    delta.pop(0)
+    avg_d = 0.0
+    total_d = 0.0
 
-    ############################################# Create output filename based on input filepath or user input?
+    for d in delta:
+        total_d += d
+    
+    avg_d = round((total_d/(mo_ct - 1)), 2)
+
+    ############################################# Create output file
+    # get input for file name
+    # check if file name has / or \
+        # no edits to the file path
+    # else have to append ".\"?
+    save_file = os.path.join(".", "budget_summary.txt")
 
     ############################################# Open writer for output of results to file
+    with open(save_file, "w", newline="") as summary_file:
 
         ######################################### Write to results to file and print to terminal
+        out_line = ["Financial Analysis"]
+        out_line.append("----------------------------")
+        out_line.append(f"Total Months: {str(mo_ct)}")
+        out_line.append(f"Total: ${str(round(balance, 2))}")
+        out_line.append(f"Average Change: ${str(round(avg_d, 2))}")
+        out_line.append(f"Greatest Increase in Profits: {g_inc[0]} ${g_inc[1]}")
+        out_line.append(f"Greatest Decrease in Profits: {g_dec[0]} ${g_dec[1]}")
+        for line in out_line
+            print(out_line)
+            summary_file.write(out_line)
+
+
 
 ###################################################################################################
 ###################################################################################################
