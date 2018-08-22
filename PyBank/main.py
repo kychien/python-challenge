@@ -2,6 +2,7 @@
 ###################################################################################################
 ##  PyBank - practice with opening csv values and evaluating data
 ##
+##  2018 08 22 - Fixed formating attempts to have output show 2 digits past decimal as currency.
 ##  2018 08 21 - Added in default file paths for opening and writing files for now.  Added in 
 ##      printing of results to terminal and results file. Fixed syntax errors.  Moved label check.
 ##      Fixed greatest value errors. Working status.
@@ -32,7 +33,7 @@ with open(filepath, "r", newline="") as source:
     last_res = 0.0                              #  holder for last month's impact
     result = 0.0                                #  holder for this month's impact
     cur_d = 0.0                                 #  holder for delta from last month
-    balance = round(0.0, 2)                     #  tracker for aggregate balance
+    balance = 0.0                               #  tracker for aggregate balance
     first = True                                #  for label evaluation, may be unnecessary
     delta = []                                  #  tracker of delta's to calculate avg at the end
     g_inc = ["","0"]                            #  tracker for greatest increase
@@ -46,7 +47,7 @@ with open(filepath, "r", newline="") as source:
             continue
         
         result = float(line[1])
-        balance += round(result, 2)
+        balance += result
 
         ######################################### Check for unique date
         if (last_mo != line[0]):
@@ -59,17 +60,17 @@ with open(filepath, "r", newline="") as source:
         last_res = result
 
         ######################################### Check for greatest values
-        if (first):                             # First entry has no actual delta
+        if (first):                             # Discount first delta
             first = False
             continue
         elif (cur_d > float(g_inc[1])):         #  New greater increase
-            g_inc = [line[0], str(round(cur_d,2))]
+            g_inc = [line[0], ("%.2f" % cur_d)]
 
         elif (cur_d == float(g_inc[1])):        #  Tied greatest increase
             g_inc[0] = g_inc[0] + ", " + line[0]
         
         elif (cur_d < float(g_dec[1])):         #  New greatest decrease
-            g_dec = [line[0], str(round(cur_d,2))]
+            g_dec = [line[0], ("%.2f" % cur_d)]
         
         elif (cur_d == float(g_dec[1])):        #  Tied greatest decrease
             g_dec[0] = g_dec[0] + ", " + line[0]
@@ -98,11 +99,13 @@ with open(filepath, "r", newline="") as source:
         ######################################### Write to results to file and print to terminal
         out_line = ["Financial Analysis"]
         out_line.append("----------------------------")
-        out_line.append(f"Total Months: {str(mo_ct)}")
-        out_line.append(f"Total: ${str(round(balance, 2))}")
-        out_line.append(f"Average Change: ${str(round(avg_d, 2))}")
-        out_line.append(f"Greatest Increase in Profits: {g_inc[0]} ${g_inc[1]}")
-        out_line.append(f"Greatest Decrease in Profits: {g_dec[0]} ${g_dec[1]}")
+        out_line.append(f"Total Months: {mo_ct}")
+        curr_str = "%.2f" % balance             #  Set 2 digit precision for balance
+        out_line.append(f"Total: ${curr_str}")
+        curr_str = "%.2f" % avg_d               #  Set 2 digit precision for average delta 
+        out_line.append(f"Average Change: ${curr_str}")
+        out_line.append(f"Greatest Increase in Profits: {g_inc[0]} ${g_inc[1]}")    #  Left out ()
+        out_line.append(f"Greatest Decrease in Profits: {g_dec[0]} ${g_dec[1]}")    #  Left out ()
         for line in out_line:
             print(line)
             summary_file.write(line)
