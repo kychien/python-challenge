@@ -14,13 +14,13 @@ import csv
 import pandas as pdL
 
 ################################################# Get file path for processing
-i_file = "election_data.csv"                  # Initial implementation with fixed filename
+i_file = "election_data.csv"                    #  Initial implementation with fixed filename
 
 ################################################# Read the file into a Pandas DataFrame
 csvfile = pdL.read_csv(i_file)
 
 ################################################# Count the number of unique Voter ID's
-voters = csvfile["Voter ID"].unique()
+voters = csvfile["Voter ID"].unique()           
 total = len(voters)
 
 ################################################# Count the number of votes for each candidate
@@ -28,8 +28,8 @@ votes = csvfile["Candidate"].value_counts()
 candidates = csvfile["Candidate"].unique()
 
 ################################################# Determine winner of the election
-highest = 0
-win_i = 0
+highest = 0                                     #  Highest number of votes value
+win_i = 0                                       #  Index of the winner's name in {candidates[]}
 i = 0
 for frame in votes:
     if (frame > highest):
@@ -41,27 +41,28 @@ for frame in votes:
 ################################################# Calculate the percentages of the total vote 
 pct_vote = [(str("%.2f" % (line * 100 / total)) + "%") for line in votes]
 
-################################################# Create output file
-o_file = "election_results.txt"
+################################################# Get file path for output
+o_file = "election_results.txt"                 #  Initial implementation with fied filename
 
-############################################# Open writer for output of results to file
+################################################# Open writer for output of results to file
 with open(o_file, "w") as results:
 
-    ######################################### Write to results to file and print to terminal
+    ############################################# Setup output data
     out_line = ["Election Results"]
     out_line.append("-------------------------")
     out_line.append(f"Total Votes: {total}")
     out_line.append("-------------------------")
     for j in range(len(candidates)):
-        out_line.append(f"{candidates[j]}:   {pct_vote[j]} ({votes[j]})")
+        out_line.append(f"{candidates[j]}:  {pct_vote[j]} ({votes[j]})")
     out_line.append("-------------------------")
     out_line.append(f"Winner: {candidates[win_i]}")
     out_line.append("-------------------------")
+    ############################################# Print to terminal and write to file
     for line in out_line:
         print(line)
         results.write(line)
         results.write("\n")
-    results.close()                    # Close output file
+    results.close()                             #  Close output file
     
     
 ###################################################################################################
