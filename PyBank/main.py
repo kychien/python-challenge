@@ -3,7 +3,8 @@
 ##  PyBank - practice with opening csv values and evaluating data
 ##
 ##  2018 08 21 - Added in default file paths for opening and writing files for now.  Added in 
-##      printing of results to terminal and results file.
+##      printing of results to terminal and results file. Fixed syntax errors.  Moved label check.
+##      Fixed greatest value errors. Working status.
 ##  2018 08 17 - Basic implementation of opening file with comments outlining future implementation.
 ##      Added in handling for balance aggregation.  Added in unique month counter assuming data is
 ##      sorted by date. Added intake recording for delta list. Added in greatest value checkers 
@@ -16,12 +17,13 @@ import os                                       #  Possibly necessary for creati
 import csv
 
 ################################################# Get file path for processing
-filepath = os.path.join(".", "budget_data.csv")
-##if (input("Enter in a "))
+filepath = "budget_data.csv"
+################################################# Prompt for file path or name
+##if (input("Enter in a file path/name?  y/n") == y)
 ##    input("File path/name:  ")
 
 ################################################# Open reader for main evaluation body
-with open(filepath, "r",newline="") as source:
+with open(filepath, "r", newline="") as source:
 
     ############################################# Set variables:
     f_reader = csv.reader(source, delimiter=",")  #  csv reader for data
@@ -31,19 +33,18 @@ with open(filepath, "r",newline="") as source:
     result = 0.0                                #  holder for this month's impact
     cur_d = 0.0                                 #  holder for delta from last month
     balance = round(0.0, 2)                     #  tracker for aggregate balance
-    labels = False                              #  for label evaluation, may be unnecessary
+    first = True                                #  for label evaluation, may be unnecessary
     delta = []                                  #  tracker of delta's to calculate avg at the end
     g_inc = ["","0"]                            #  tracker for greatest increase
     g_dec = ["","0"]                            #  tracker for greatest decrease
 
-    ############################################# Check for labels
-    first_line = f_reader.readline()
-    if (first_line[0] == "Date")
-        next(f_reader)
-
     ############################################# Loop through file
     for line in f_reader:
 
+        ######################################### Check for labels
+        if (line[0] == "Date"):
+            continue
+        
         result = float(line[1])
         balance += round(result, 2)
 
@@ -58,14 +59,17 @@ with open(filepath, "r",newline="") as source:
         last_res = result
 
         ######################################### Check for greatest values
-        if (cur_d > float(g_inc[1])):           #  New greater increase
-            g_inc = line
+        if (first):                             # First entry has no actual delta
+            first = False
+            continue
+        elif (cur_d > float(g_inc[1])):         #  New greater increase
+            g_inc = [line[0], str(round(cur_d,2))]
 
         elif (cur_d == float(g_inc[1])):        #  Tied greatest increase
             g_inc[0] = g_inc[0] + ", " + line[0]
         
         elif (cur_d < float(g_dec[1])):         #  New greatest decrease
-            g_dec = line
+            g_dec = [line[0], str(round(cur_d,2))]
         
         elif (cur_d == float(g_dec[1])):        #  Tied greatest decrease
             g_dec[0] = g_dec[0] + ", " + line[0]
@@ -86,10 +90,10 @@ with open(filepath, "r",newline="") as source:
     # check if file name has / or \
         # no edits to the file path
     # else have to append ".\"?
-    save_file = os.path.join(".", "budget_summary.txt")
+    save_file = "budget_summary.txt"
 
     ############################################# Open writer for output of results to file
-    with open(save_file, "w", newline="") as summary_file:
+    with open(save_file, "w") as summary_file:
 
         ######################################### Write to results to file and print to terminal
         out_line = ["Financial Analysis"]
@@ -99,11 +103,13 @@ with open(filepath, "r",newline="") as source:
         out_line.append(f"Average Change: ${str(round(avg_d, 2))}")
         out_line.append(f"Greatest Increase in Profits: {g_inc[0]} ${g_inc[1]}")
         out_line.append(f"Greatest Decrease in Profits: {g_dec[0]} ${g_dec[1]}")
-        for line in out_line
-            print(out_line)
-            summary_file.write(out_line)
-
-
+        for line in out_line:
+            print(line)
+            summary_file.write(line)
+            summary_file.write("\n")
+        summary_file.close()                    # Close output file
+    
+    source.close()                              # Close input file
 
 ###################################################################################################
 ###################################################################################################
